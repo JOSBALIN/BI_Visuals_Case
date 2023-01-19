@@ -39,6 +39,31 @@ export class CircleSettings extends FormattingSettingsCard{
         value: { value: "#ffffff" }
     });
 
+
+    public circleThreshholdColor = new formattingSettings.Slider({
+        name: "threshholdLowerColor",
+        displayName: "Color (lower threshold)",
+        value: 2
+    });
+
+    public circleThreshholdToggle = new formattingSettings.ToggleSwitch({
+        name: "treshholdToggle",
+        displayName: "toggle threshhold",
+        value: false
+    });
+
+    public circleTreshHoldColor = new formattingSettings.ColorPicker({
+        name: "lowerThreshhold",
+        displayName: "Color (low threshold)",
+        value: { value: "#ffffff" }
+    });
+
+    // public circleThreshholdRange = new formattingSettings.Num({
+    //     name: "lowerThreshhold",
+    //     displayName: "Color (low threshold)",
+    //     value: { value: "#ffffff" }
+    // });
+
     public circleThickness = new formattingSettings.NumUpDown({
         name: "circleThickness",
         displayName: "Thickness",
@@ -47,7 +72,7 @@ export class CircleSettings extends FormattingSettingsCard{
 
     public name: string = "circle";
     public displayName: string = "Circle";
-    public slices: FormattingSettingsSlice[] = [this.circleColor, this.circleThickness]
+    public slices: FormattingSettingsSlice[] = [this.circleColor, this.circleThreshholdColor, this.circleThreshholdColor, this.circleThickness]
 }
 
 export class VisualSettings extends FormattingSettingsModel {

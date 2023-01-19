@@ -48,6 +48,26 @@ class CircleSettings extends FormattingSettingsCard {
             displayName: "Color",
             value: { value: "#ffffff" }
         });
+        this.circleThreshholdColor = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .Slider */ .iR({
+            name: "threshholdLowerColor",
+            displayName: "Color (lower threshold)",
+            value: 2
+        });
+        this.circleThreshholdToggle = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ToggleSwitch */ .Zh({
+            name: "treshholdToggle",
+            displayName: "toggle threshhold",
+            value: false
+        });
+        this.circleTreshHoldColor = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ColorPicker */ .zH({
+            name: "lowerThreshhold",
+            displayName: "Color (low threshold)",
+            value: { value: "#ffffff" }
+        });
+        // public circleThreshholdRange = new formattingSettings.Num({
+        //     name: "lowerThreshhold",
+        //     displayName: "Color (low threshold)",
+        //     value: { value: "#ffffff" }
+        // });
         this.circleThickness = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .NumUpDown */ .L_({
             name: "circleThickness",
             displayName: "Thickness",
@@ -55,7 +75,7 @@ class CircleSettings extends FormattingSettingsCard {
         });
         this.name = "circle";
         this.displayName = "Circle";
-        this.slices = [this.circleColor, this.circleThickness];
+        this.slices = [this.circleColor, this.circleThreshholdColor, this.circleThreshholdColor, this.circleThickness];
     }
 }
 class VisualSettings extends FormattingSettingsModel {
@@ -169,9 +189,11 @@ class Visual {
 /* harmony export */   "Hn": () => (/* binding */ Model),
 /* harmony export */   "L_": () => (/* binding */ NumUpDown),
 /* harmony export */   "Zb": () => (/* binding */ Card),
+/* harmony export */   "Zh": () => (/* binding */ ToggleSwitch),
+/* harmony export */   "iR": () => (/* binding */ Slider),
 /* harmony export */   "zH": () => (/* binding */ ColorPicker)
 /* harmony export */ });
-/* unused harmony exports SimpleSlice, AlignmentGroup, ToggleSwitch, Slider, DatePicker, ItemDropdown, AutoDropdown, DurationPicker, ErrorRangeControl, FieldPicker, ItemFlagsSelection, AutoFlagsSelection, TextInput, TextArea, FontPicker, GradientBar, ImageUpload, ListEditor, ReadOnlyText, ShapeMapSelector, CompositeSlice, FontControl, MarginPadding, Container, ContainerItem */
+/* unused harmony exports SimpleSlice, AlignmentGroup, DatePicker, ItemDropdown, AutoDropdown, DurationPicker, ErrorRangeControl, FieldPicker, ItemFlagsSelection, AutoFlagsSelection, TextInput, TextArea, FontPicker, GradientBar, ImageUpload, ListEditor, ReadOnlyText, ShapeMapSelector, CompositeSlice, FontControl, MarginPadding, Container, ContainerItem */
 /* harmony import */ var _utils_FormattingSettingsUtils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3827);
 /**
  * Powerbi utils components classes for custom visual formatting pane objects
@@ -242,7 +264,7 @@ class AlignmentGroup extends (/* unused pure expression or super */ null && (Sim
         return Object.assign(Object.assign({}, super.getFormattingComponent(objectName)), { mode: this.mode, supportsNoSelection: this.supportsNoSelection });
     }
 }
-class ToggleSwitch extends (/* unused pure expression or super */ null && (SimpleSlice)) {
+class ToggleSwitch extends SimpleSlice {
     constructor(object) {
         super(object);
         this.type = "ToggleSwitch" /* visuals.FormattingComponent.ToggleSwitch */;
@@ -266,7 +288,7 @@ class NumUpDown extends SimpleSlice {
         return Object.assign(Object.assign({}, super.getFormattingComponent(objectName)), { options: this.options });
     }
 }
-class Slider extends (/* unused pure expression or super */ null && (NumUpDown)) {
+class Slider extends NumUpDown {
     constructor() {
         super(...arguments);
         this.type = "Slider" /* visuals.FormattingComponent.Slider */;
