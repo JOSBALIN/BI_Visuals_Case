@@ -48,23 +48,28 @@ class CircleSettings extends FormattingSettingsCard {
             displayName: "Color",
             value: { value: "#ffffff" }
         });
-        this.circleThreshholdColor = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .Slider */ .iR({
-            name: "threshholdLowerColor",
-            displayName: "Color (lower threshold)",
-            value: 2
-        });
-        this.circleThreshholdToggle = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ToggleSwitch */ .Zh({
-            name: "treshholdToggle",
-            displayName: "toggle threshhold",
-            value: false
-        });
-        this.circleTreshHoldColor = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ColorPicker */ .zH({
-            name: "lowerThreshhold",
-            displayName: "Color (low threshold)",
+        this.circleColorThreshold = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ColorPicker */ .zH({
+            name: "circleColorThreshold",
+            displayName: "Color2",
             value: { value: "#ffffff" }
         });
-        // public circleThreshholdRange = new formattingSettings.Num({
-        //     name: "lowerThreshhold",
+        this.circleThresholdMax = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .NumUpDown */ .L_({
+            name: "circleThresholdMax",
+            displayName: "Threshold Max",
+            value: 100
+        });
+        this.circleThresholdMin = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .NumUpDown */ .L_({
+            name: "circleThresholdMin",
+            displayName: "Threshold Min",
+            value: 0
+        });
+        // public circleThresholdToggle = new formattingSettings.ToggleSwitch({
+        //     name: "circleThresholdToggle",
+        //     displayName: "toggle threshhold",
+        //     value: true
+        // });
+        // public circleThresholdRange = new formattingSettings.Num({
+        //     name: "lowerThreshold",
         //     displayName: "Color (low threshold)",
         //     value: { value: "#ffffff" }
         // });
@@ -75,7 +80,7 @@ class CircleSettings extends FormattingSettingsCard {
         });
         this.name = "circle";
         this.displayName = "Circle";
-        this.slices = [this.circleColor, this.circleThreshholdColor, this.circleThreshholdColor, this.circleThickness];
+        this.slices = [this.circleColor, this.circleColorThreshold, this.circleThickness, this.circleThresholdMax, this.circleThresholdMin];
     }
 }
 class VisualSettings extends FormattingSettingsModel {
@@ -128,6 +133,7 @@ class VisualSettings extends FormattingSettingsModel {
 
 
 
+
 class Visual {
     constructor(options) {
         this.formattingSettingsService = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z();
@@ -149,9 +155,16 @@ class Visual {
         this.visualSettings = this.formattingSettingsService.populateFormattingSettingsModel(_settings__WEBPACK_IMPORTED_MODULE_1__/* .VisualSettings */ .J, options.dataViews);
         this.visualSettings.circle.circleThickness.value = Math.max(0, this.visualSettings.circle.circleThickness.value);
         this.visualSettings.circle.circleThickness.value = Math.min(10, this.visualSettings.circle.circleThickness.value);
+        function hexToRgb(hex) {
+            let r = parseInt(hex.substring(1, 3), 16);
+            let g = parseInt(hex.substring(3, 5), 16);
+            let b = parseInt(hex.substring(5, 7), 16);
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+        this.visualSettings.circle.circleThresholdMax.value = parseInt(String(dataView.single.value)); // casting to string before parseInt. Refactor in future.
+        let interpolatedColor = (0,d3__WEBPACK_IMPORTED_MODULE_0__/* .interpolateRgb */ .LX0)(this.visualSettings.circle.circleColor.value.value, this.visualSettings.circle.circleColorThreshold.value.value)(0.5);
         this.circle
-            .style("fill", this.visualSettings.circle.circleColor.value.value)
-            .style("fill-opacity", 0.5)
+            .style("fill", interpolatedColor)
             .style("stroke", "black")
             .style("stroke-width", this.visualSettings.circle.circleThickness.value)
             .attr("r", radius)
@@ -189,11 +202,9 @@ class Visual {
 /* harmony export */   "Hn": () => (/* binding */ Model),
 /* harmony export */   "L_": () => (/* binding */ NumUpDown),
 /* harmony export */   "Zb": () => (/* binding */ Card),
-/* harmony export */   "Zh": () => (/* binding */ ToggleSwitch),
-/* harmony export */   "iR": () => (/* binding */ Slider),
 /* harmony export */   "zH": () => (/* binding */ ColorPicker)
 /* harmony export */ });
-/* unused harmony exports SimpleSlice, AlignmentGroup, DatePicker, ItemDropdown, AutoDropdown, DurationPicker, ErrorRangeControl, FieldPicker, ItemFlagsSelection, AutoFlagsSelection, TextInput, TextArea, FontPicker, GradientBar, ImageUpload, ListEditor, ReadOnlyText, ShapeMapSelector, CompositeSlice, FontControl, MarginPadding, Container, ContainerItem */
+/* unused harmony exports SimpleSlice, AlignmentGroup, ToggleSwitch, Slider, DatePicker, ItemDropdown, AutoDropdown, DurationPicker, ErrorRangeControl, FieldPicker, ItemFlagsSelection, AutoFlagsSelection, TextInput, TextArea, FontPicker, GradientBar, ImageUpload, ListEditor, ReadOnlyText, ShapeMapSelector, CompositeSlice, FontControl, MarginPadding, Container, ContainerItem */
 /* harmony import */ var _utils_FormattingSettingsUtils__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3827);
 /**
  * Powerbi utils components classes for custom visual formatting pane objects
@@ -264,7 +275,7 @@ class AlignmentGroup extends (/* unused pure expression or super */ null && (Sim
         return Object.assign(Object.assign({}, super.getFormattingComponent(objectName)), { mode: this.mode, supportsNoSelection: this.supportsNoSelection });
     }
 }
-class ToggleSwitch extends SimpleSlice {
+class ToggleSwitch extends (/* unused pure expression or super */ null && (SimpleSlice)) {
     constructor(object) {
         super(object);
         this.type = "ToggleSwitch" /* visuals.FormattingComponent.ToggleSwitch */;
@@ -288,7 +299,7 @@ class NumUpDown extends SimpleSlice {
         return Object.assign(Object.assign({}, super.getFormattingComponent(objectName)), { options: this.options });
     }
 }
-class Slider extends NumUpDown {
+class Slider extends (/* unused pure expression or super */ null && (NumUpDown)) {
     constructor() {
         super(...arguments);
         this.type = "Slider" /* visuals.FormattingComponent.Slider */;
@@ -1997,6 +2008,38 @@ function nogamma(a, b) {
 /* harmony export */   "Z": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (x => () => x);
+
+
+/***/ }),
+
+/***/ 4042:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "LX": () => (/* reexport safe */ _rgb_js__WEBPACK_IMPORTED_MODULE_0__.ZP)
+/* harmony export */ });
+/* harmony import */ var _rgb_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6354);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /***/ }),
@@ -5780,12 +5823,14 @@ function defaultConstrain(transform, extent, translateExtent) {
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Ys": () => (/* reexport safe */ d3_selection__WEBPACK_IMPORTED_MODULE_1__.Ys)
+/* harmony export */   "LX0": () => (/* reexport safe */ d3_interpolate__WEBPACK_IMPORTED_MODULE_1__.LX),
+/* harmony export */   "Ys": () => (/* reexport safe */ d3_selection__WEBPACK_IMPORTED_MODULE_2__.Ys)
 /* harmony export */ });
 /* harmony import */ var d3_brush__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9961);
-/* harmony import */ var d3_selection__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3950);
-/* harmony import */ var d3_transition__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3399);
-/* harmony import */ var d3_zoom__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(5180);
+/* harmony import */ var d3_interpolate__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(4042);
+/* harmony import */ var d3_selection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3950);
+/* harmony import */ var d3_transition__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3399);
+/* harmony import */ var d3_zoom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(5180);
 
 
 

@@ -37,6 +37,7 @@ import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 import { VisualSettings } from "./settings";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
+import { interpolateRgb } from "d3";
 
 export class Visual implements IVisual {
   private host: IVisualHost;
@@ -59,6 +60,7 @@ export class Visual implements IVisual {
     this.circle = this.container.append("circle").classed("circle", true);
     this.textValue = this.container.append("text").classed("textValue", true);
     this.textLabel = this.container.append("text").classed("textLabel", true);
+
   }
 
   public update(options: VisualUpdateOptions) {
@@ -73,9 +75,22 @@ export class Visual implements IVisual {
     this.visualSettings.circle.circleThickness.value = Math.max(0, this.visualSettings.circle.circleThickness.value);
     this.visualSettings.circle.circleThickness.value = Math.min(10, this.visualSettings.circle.circleThickness.value);
 
+
+    
+    function hexToRgb(hex: string): string {
+      let r = parseInt(hex.substring(1, 3), 16);
+      let g = parseInt(hex.substring(3, 5), 16);
+      let b = parseInt(hex.substring(5, 7), 16);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    
+    
+    this.visualSettings.circle.circleThresholdMax.value = parseInt(String(dataView.single.value)); // casting to string before parseInt. Refactor in future.
+
+    let interpolatedColor = interpolateRgb(this.visualSettings.circle.circleColor.value.value, this.visualSettings.circle.circleColorThreshold.value.value)(0.5);
+
     this.circle
-    .style("fill", this.visualSettings.circle.circleColor.value.value)
-      .style("fill-opacity", 0.5)
+    .style("fill", interpolatedColor)
       .style("stroke", "black")
       .style("stroke-width", this.visualSettings.circle.circleThickness.value)
       .attr("r", radius)

@@ -4,9 +4,9 @@ import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 export declare class CircleSettings extends FormattingSettingsCard {
     circleColor: formattingSettings.ColorPicker;
-    circleThreshholdColor: formattingSettings.Slider;
-    circleThreshholdToggle: formattingSettings.ToggleSwitch;
-    circleTreshHoldColor: formattingSettings.ColorPicker;
+    circleColorThreshold: formattingSettings.ColorPicker;
+    circleThresholdMax: formattingSettings.NumUpDown;
+    circleThresholdMin: formattingSettings.NumUpDown;
     circleThickness: formattingSettings.NumUpDown;
     name: string;
     displayName: string;

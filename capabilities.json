@@ -18,11 +18,31 @@
                         }
                     }
                 },
+                "circleColorThreshold": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
                 "circleThickness": {
                     "type": {
                         "numeric": true
                     }
+                },
+                "circleThresholdMin": {
+                    "type": {
+                        "numeric": true
+                    }
+                },
+                "circleThresholdMax": {
+                    "type": {
+                        "numeric": true
+                    }
                 }
+                
             }
         }
     },

@@ -31,6 +31,7 @@ import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import FormattingSettingsCard = formattingSettings.Card;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
+import DataView = powerbi.DataView;
 
 export class CircleSettings extends FormattingSettingsCard{
     public circleColor = new formattingSettings.ColorPicker({
@@ -39,27 +40,32 @@ export class CircleSettings extends FormattingSettingsCard{
         value: { value: "#ffffff" }
     });
 
-
-    public circleThreshholdColor = new formattingSettings.Slider({
-        name: "threshholdLowerColor",
-        displayName: "Color (lower threshold)",
-        value: 2
-    });
-
-    public circleThreshholdToggle = new formattingSettings.ToggleSwitch({
-        name: "treshholdToggle",
-        displayName: "toggle threshhold",
-        value: false
-    });
-
-    public circleTreshHoldColor = new formattingSettings.ColorPicker({
-        name: "lowerThreshhold",
-        displayName: "Color (low threshold)",
+    
+    public circleColorThreshold = new formattingSettings.ColorPicker({
+        name: "circleColorThreshold",
+        displayName: "Color2",
         value: { value: "#ffffff" }
     });
+    
+    public circleThresholdMax = new formattingSettings.NumUpDown({
+        name: "circleThresholdMax",
+        displayName: "Threshold Max",
+        value: 100
+    });
 
-    // public circleThreshholdRange = new formattingSettings.Num({
-    //     name: "lowerThreshhold",
+    public circleThresholdMin = new formattingSettings.NumUpDown({
+        name: "circleThresholdMin",
+        displayName: "Threshold Min",
+        value: 0
+    });
+    
+    // public circleThresholdToggle = new formattingSettings.ToggleSwitch({
+    //     name: "circleThresholdToggle",
+    //     displayName: "toggle threshhold",
+    //     value: true
+    // });
+    // public circleThresholdRange = new formattingSettings.Num({
+    //     name: "lowerThreshold",
     //     displayName: "Color (low threshold)",
     //     value: { value: "#ffffff" }
     // });
@@ -72,7 +78,7 @@ export class CircleSettings extends FormattingSettingsCard{
 
     public name: string = "circle";
     public displayName: string = "Circle";
-    public slices: FormattingSettingsSlice[] = [this.circleColor, this.circleThreshholdColor, this.circleThreshholdColor, this.circleThickness]
+    public slices: FormattingSettingsSlice[] = [this.circleColor, this.circleColorThreshold, this.circleThickness, this.circleThresholdMax, this.circleThresholdMin]
 }
 
 export class VisualSettings extends FormattingSettingsModel {
