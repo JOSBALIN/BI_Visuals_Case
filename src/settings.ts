@@ -31,57 +31,33 @@ import { formattingSettings } from "powerbi-visuals-utils-formattingmodel";
 import FormattingSettingsCard = formattingSettings.Card;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
-import DataView = powerbi.DataView;
 
-export class CircleSettings extends FormattingSettingsCard{
-    public circleColor = new formattingSettings.ColorPicker({
-        name: "circleColor",
-        displayName: "Color",
-        value: { value: "#ffffff" }
-    });
+export class CircleSettings extends FormattingSettingsCard {
+  public circleColor = new formattingSettings.ColorPicker({
+    name: "circleColor",
+    displayName: "Fill",
+    value: { value: "#ffffff" },
+  });
 
-    
-    public circleColorThreshold = new formattingSettings.ColorPicker({
-        name: "circleColorThreshold",
-        displayName: "Color2",
-        value: { value: "#ffffff" }
-    });
-    
-    public circleThresholdMax = new formattingSettings.NumUpDown({
-        name: "circleThresholdMax",
-        displayName: "Threshold Max",
-        value: 100
-    });
 
-    public circleThresholdMin = new formattingSettings.NumUpDown({
-        name: "circleThresholdMin",
-        displayName: "Threshold Min",
-        value: 0
-    });
-    
-    // public circleThresholdToggle = new formattingSettings.ToggleSwitch({
-    //     name: "circleThresholdToggle",
-    //     displayName: "toggle threshhold",
-    //     value: true
-    // });
-    // public circleThresholdRange = new formattingSettings.Num({
-    //     name: "lowerThreshold",
-    //     displayName: "Color (low threshold)",
-    //     value: { value: "#ffffff" }
-    // });
 
-    public circleThickness = new formattingSettings.NumUpDown({
-        name: "circleThickness",
-        displayName: "Thickness",
-        value: 2
-    });
 
-    public name: string = "circle";
-    public displayName: string = "Circle";
-    public slices: FormattingSettingsSlice[] = [this.circleColor, this.circleColorThreshold, this.circleThickness, this.circleThresholdMax, this.circleThresholdMin]
+
+  public circleThickness = new formattingSettings.NumUpDown({
+    name: "circleThickness",
+    displayName: "Thickness",
+    value: 2,
+  });
+
+  public name: string = "circle";
+  public displayName: string = "Circle";
+  public slices: FormattingSettingsSlice[] = [
+    this.circleColor,
+    this.circleThickness
+  ];
 }
 
 export class VisualSettings extends FormattingSettingsModel {
-    public circle: CircleSettings = new CircleSettings();
-    public cards: FormattingSettingsCard[] = [this.circle];
+  public circle: CircleSettings = new CircleSettings();
+  public cards: FormattingSettingsCard[] = [this.circle];
 }

@@ -45,42 +45,20 @@ class CircleSettings extends FormattingSettingsCard {
         super(...arguments);
         this.circleColor = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ColorPicker */ .zH({
             name: "circleColor",
-            displayName: "Color",
-            value: { value: "#ffffff" }
+            displayName: "Fill",
+            value: { value: "#ffffff" },
         });
-        this.circleColorThreshold = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ColorPicker */ .zH({
-            name: "circleColorThreshold",
-            displayName: "Color2",
-            value: { value: "#ffffff" }
-        });
-        this.circleThresholdMax = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .NumUpDown */ .L_({
-            name: "circleThresholdMax",
-            displayName: "Threshold Max",
-            value: 100
-        });
-        this.circleThresholdMin = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .NumUpDown */ .L_({
-            name: "circleThresholdMin",
-            displayName: "Threshold Min",
-            value: 0
-        });
-        // public circleThresholdToggle = new formattingSettings.ToggleSwitch({
-        //     name: "circleThresholdToggle",
-        //     displayName: "toggle threshhold",
-        //     value: true
-        // });
-        // public circleThresholdRange = new formattingSettings.Num({
-        //     name: "lowerThreshold",
-        //     displayName: "Color (low threshold)",
-        //     value: { value: "#ffffff" }
-        // });
         this.circleThickness = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .NumUpDown */ .L_({
             name: "circleThickness",
             displayName: "Thickness",
-            value: 2
+            value: 2,
         });
         this.name = "circle";
         this.displayName = "Circle";
-        this.slices = [this.circleColor, this.circleColorThreshold, this.circleThickness, this.circleThresholdMax, this.circleThresholdMin];
+        this.slices = [
+            this.circleColor,
+            this.circleThickness
+        ];
     }
 }
 class VisualSettings extends FormattingSettingsModel {
@@ -103,6 +81,7 @@ class VisualSettings extends FormattingSettingsModel {
 /* harmony import */ var d3__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(8976);
 /* harmony import */ var _settings__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(3050);
 /* harmony import */ var powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(4261);
+/* provided dependency */ var window = __webpack_require__(6738);
 /*
  *  Power BI Visual CLI
  *
@@ -137,10 +116,10 @@ class VisualSettings extends FormattingSettingsModel {
 class Visual {
     constructor(options) {
         this.formattingSettingsService = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z();
-        this.svg = d3__WEBPACK_IMPORTED_MODULE_0__/* .select */ .Ys(options.element)
+        this.svgRoot = d3__WEBPACK_IMPORTED_MODULE_0__/* .select */ .Ys(options.element)
             .append("svg")
             .classed("circleCard", true);
-        this.container = this.svg.append("g").classed("container", true);
+        this.container = this.svgRoot.append("g").classed("container", true);
         this.circle = this.container.append("circle").classed("circle", true);
         this.textValue = this.container.append("text").classed("textValue", true);
         this.textLabel = this.container.append("text").classed("textLabel", true);
@@ -149,22 +128,36 @@ class Visual {
         let dataView = options.dataViews[0];
         let width = options.viewport.width;
         let height = options.viewport.height;
-        this.svg.attr("width", width);
-        this.svg.attr("height", height);
+        console.log(options);
+        function open() {
+            console.log("ayy");
+            window.open('http://en.wikipedia.org', '_blank' // <- This is what makes it open in a new window.
+            );
+        }
+        this.svgRoot
+            .attr("width", width)
+            .attr("height", height)
+            .on('click', function () {
+            open();
+        });
         let radius = Math.min(width, height) / 2.2;
         this.visualSettings = this.formattingSettingsService.populateFormattingSettingsModel(_settings__WEBPACK_IMPORTED_MODULE_1__/* .VisualSettings */ .J, options.dataViews);
         this.visualSettings.circle.circleThickness.value = Math.max(0, this.visualSettings.circle.circleThickness.value);
         this.visualSettings.circle.circleThickness.value = Math.min(10, this.visualSettings.circle.circleThickness.value);
-        function hexToRgb(hex) {
-            let r = parseInt(hex.substring(1, 3), 16);
-            let g = parseInt(hex.substring(3, 5), 16);
-            let b = parseInt(hex.substring(5, 7), 16);
-            return `rgb(${r}, ${g}, ${b})`;
-        }
-        this.visualSettings.circle.circleThresholdMax.value = parseInt(String(dataView.single.value)); // casting to string before parseInt. Refactor in future.
-        let interpolatedColor = (0,d3__WEBPACK_IMPORTED_MODULE_0__/* .interpolateRgb */ .LX0)(this.visualSettings.circle.circleColor.value.value, this.visualSettings.circle.circleColorThreshold.value.value)(0.5);
+        // TOTAL
+        // GOAL
+        // Min (to reach one color)
+        // Max (to reach another color)
+        // Coloring is based on total's proximity to goal
+        // Color is dependant on min and max.
+        // The closer (total / goal) * 100 is to the percent of max, the closer it moves towards color max threshold
+        // The closer (total / goal) * 100 is to the percent of min, the closer it moves towards the color min threshold
+        // this.visualSettings.circle.circleThresholdMax.value = parseInt(String(dataView.single.value)); // casting to string before parseInt. Refactor in future.
+        // (parseInt(String(dataView.single.value)) / this.visualSettings.circle.circleThresholdGoal.value)
+        let interpolatedPercent = 0.5;
+        let interpolatedColor = (0,d3__WEBPACK_IMPORTED_MODULE_0__/* .interpolateRgb */ .LX0)(this.visualSettings.circle.circleColor.value.value, "blue")(interpolatedPercent);
         this.circle
-            .style("fill", interpolatedColor)
+            .style("fill", this.visualSettings.circle.circleColor.value.value)
             .style("stroke", "black")
             .style("stroke-width", this.visualSettings.circle.circleThickness.value)
             .attr("r", radius)

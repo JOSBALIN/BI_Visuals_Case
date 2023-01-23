@@ -3,7 +3,14 @@
         {
             "displayName": "Measure",
             "name": "measure",
-            "kind": "Measure"
+            "kind": "Measure",
+            "description": "Singleton values, max 1"
+        },
+        {
+            "displayName": "Category",
+            "name": "category",
+            "kind": "Grouping",
+            "description": "Grouping to display"
         }
     ],
     "objects": {
@@ -18,42 +25,25 @@
                         }
                     }
                 },
-                "circleColorThreshold": {
-                    "type": {
-                        "fill": {
-                            "solid": {
-                                "color": true
-                            }
-                        }
-                    }
-                },
                 "circleThickness": {
                     "type": {
                         "numeric": true
                     }
-                },
-                "circleThresholdMin": {
-                    "type": {
-                        "numeric": true
-                    }
-                },
-                "circleThresholdMax": {
-                    "type": {
-                        "numeric": true
-                    }
-                }
-                
+                }                
             }
         }
     },
     "dataViewMappings": [
         {
-            "conditions": [
-                { "measure": { "max": 1 } }
-            ],
-            "single": {
-                "role": "measure"
+          "conditions": [{ "measure": { "max": 1 }, "category": { "max": 1 } }],
+          "categorical": {
+            "categories": {
+              "for": { "in": "category" }
+            },
+            "values": {
+              "select": [{ "bind": { "to": "measure" } }]
             }
+          }
         }
     ],
     "privileges": []

@@ -6,6 +6,14 @@ p em {
   background: yellow;
   padding: 5px;
 }
+@keyframes example-animation {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(400px);
+  }
+}
 
 
 /*# sourceMappingURL=https://localhost:8080/assets/visual.css.map*/
