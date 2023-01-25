@@ -18,10 +18,14 @@ export declare class Visual implements IVisual {
     private host;
     private svgRoot;
     private container;
+    private legendContainer;
+    private circleContainer;
     private textValue;
     private textLabel;
+    private drag;
     private visualSettings;
     private formattingSettingsService;
+    dragPos: any;
     constructor(options: VisualConstructorOptions);
     update(options: VisualUpdateOptions): void;
     getFormattingModel(): powerbi.visuals.FormattingModel;

@@ -25,11 +25,6 @@
                         }
                     }
                 },
-                "circleThickness": {
-                    "type": {
-                        "numeric": true
-                    }
-                },
                 "toggleLegend": {
                     "type": {
                         "bool": true

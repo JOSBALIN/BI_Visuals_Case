@@ -59,11 +59,15 @@ export class Visual implements IVisual {
   private host: IVisualHost;
   private svgRoot: Selection<SVGElement>;
   private container: Selection<SVGElement>;
+  private legendContainer: Selection<SVGElement>;
+  private circleContainer: Selection<SVGElement>;
   private textValue: Selection<SVGElement>;
   private textLabel: Selection<SVGElement>;
+  private drag;
 
   private visualSettings: VisualSettings;
   private formattingSettingsService: FormattingSettingsService;
+  dragPos: any;
 
   constructor(options: VisualConstructorOptions) {
     this.formattingSettingsService = new FormattingSettingsService();
@@ -71,9 +75,26 @@ export class Visual implements IVisual {
       .select(options.element)
       .append("svg")
       .classed("circleCard", true);
+
+
+      let x, y;
+      this.drag = d3.drag()
+      .on("drag", function(d) {
+          d3.select(this)
+              .attr("transform", "translate(" + (d3.pointer(d)[0] - x) + "," + (d3.pointer(d)[1] - y) + ")");
+      })
+      .on("start", function(d) {
+          x = d3.pointer(d)[0]
+          y = d3.pointer(d)[1]
+      });
+
+
     this.container = this.svgRoot.append("g").classed("container", true);
+    this.legendContainer = this.svgRoot.append("g").classed("container", true).call(this.drag);
+    this.circleContainer = this.svgRoot.append("g").classed("container", true).call(this.drag);
     this.textValue = this.container.append("text").classed("textValue", true);
     this.textLabel = this.container.append("text").classed("textLabel", true);
+
   }
 
   public update(options: VisualUpdateOptions) {
@@ -88,7 +109,6 @@ export class Visual implements IVisual {
     let visualFill: string = this.visualSettings.circle.fillColor.value.value;
     let toggleLegend: boolean = this.visualSettings.circle.toggleLegend.value;
     let toggleLog: boolean = this.visualSettings.circle.toggleLog.value;
-    console.log(this.visualSettings.circle.fillColor.value.value);
 
     // Remove all existing circles to avoid infinite renders
     // Perhaps not ideal?
@@ -144,13 +164,13 @@ export class Visual implements IVisual {
       let dataPointCat: string = viewModel.dataPoints[i].category;
       let defaultFilter: string = `brightness(${(i + 1) * 20}%)`;
       let hoverFilter: string = `brightness(${(i + 1) * 30}%)`;
-      let visualCircle = this.container
+      let visualCircle = this.circleContainer
         .append("circle")
         .classed("circle", true);
-      let legendRect = this.container
+      let legendRect = this.legendContainer
         .append("rect")
         .classed("legend-rect", true);
-      let legendText = this.container
+      let legendText = this.legendContainer
         .append("text")
         .classed("legend-text", true);
       let radius = 1;
@@ -181,7 +201,6 @@ export class Visual implements IVisual {
             event
           );
           labelHover(event, `${dataPointCat}, ${dataPointValue}`);
-          // console.log(viewModel.dataPoints[i].value)
         })
         .on("mouseout", function (event) {
           dataPointHover(
@@ -239,8 +258,8 @@ export class Visual implements IVisual {
     }
 
     // Shoddy workaround - refactor.
-    let hoverLabelFill = this.container.append("rect");
-    let hoverLabel = this.container.append("text").classed("hover-label", true);
+    let hoverLabelFill = this.circleContainer.append("rect").classed("hover-label", true);
+    let hoverLabel = this.circleContainer.append("text").classed("hover-label", true);
 
     function toggleCircleVis(circle, legendRect, originalColor, hoverFilter) {
       if (circle.style("display") === "none") {

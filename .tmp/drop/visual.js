@@ -50,12 +50,12 @@ class CircleSettings extends FormattingSettingsCard {
         });
         this.toggleLegend = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ToggleSwitch */ .Zh({
             name: "toggleLegend",
-            displayName: "Toggle legend",
+            displayName: "Legend",
             value: true
         });
         this.toggleLog = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .ToggleSwitch */ .Zh({
             name: "toggleLog",
-            displayName: "Toggle Logarithm",
+            displayName: "Logarithm (base 10)",
             value: false
         });
         this.circleThickness = new powerbi_visuals_utils_formattingmodel__WEBPACK_IMPORTED_MODULE_0__/* .NumUpDown */ .L_({
@@ -64,12 +64,11 @@ class CircleSettings extends FormattingSettingsCard {
             value: 2,
         });
         this.name = "circle";
-        this.displayName = "Circle";
+        this.displayName = "Graph options";
         this.slices = [
             this.toggleLegend,
+            this.toggleLog,
             this.fillColor,
-            this.circleThickness,
-            this.toggleLog
         ];
     }
 }
@@ -132,7 +131,19 @@ class Visual {
         this.svgRoot = d3__WEBPACK_IMPORTED_MODULE_0__/* .select */ .Ys(options.element)
             .append("svg")
             .classed("circleCard", true);
+        let x, y;
+        this.drag = d3__WEBPACK_IMPORTED_MODULE_0__/* .drag */ .ohM()
+            .on("drag", function (d) {
+            d3__WEBPACK_IMPORTED_MODULE_0__/* .select */ .Ys(this)
+                .attr("transform", "translate(" + (d3__WEBPACK_IMPORTED_MODULE_0__/* .pointer */ .cx$(d)[0] - x) + "," + (d3__WEBPACK_IMPORTED_MODULE_0__/* .pointer */ .cx$(d)[1] - y) + ")");
+        })
+            .on("start", function (d) {
+            x = d3__WEBPACK_IMPORTED_MODULE_0__/* .pointer */ .cx$(d)[0];
+            y = d3__WEBPACK_IMPORTED_MODULE_0__/* .pointer */ .cx$(d)[1];
+        });
         this.container = this.svgRoot.append("g").classed("container", true);
+        this.legendContainer = this.svgRoot.append("g").classed("container", true).call(this.drag);
+        this.circleContainer = this.svgRoot.append("g").classed("container", true).call(this.drag);
         this.textValue = this.container.append("text").classed("textValue", true);
         this.textLabel = this.container.append("text").classed("textLabel", true);
     }
@@ -145,7 +156,6 @@ class Visual {
         let visualFill = this.visualSettings.circle.fillColor.value.value;
         let toggleLegend = this.visualSettings.circle.toggleLegend.value;
         let toggleLog = this.visualSettings.circle.toggleLog.value;
-        console.log(this.visualSettings.circle.fillColor.value.value);
         // Remove all existing circles to avoid infinite renders
         // Perhaps not ideal?
         d3__WEBPACK_IMPORTED_MODULE_0__/* .selectAll */ .td_(".circle").remove();
@@ -191,13 +201,13 @@ class Visual {
             let dataPointCat = viewModel.dataPoints[i].category;
             let defaultFilter = `brightness(${(i + 1) * 20}%)`;
             let hoverFilter = `brightness(${(i + 1) * 30}%)`;
-            let visualCircle = this.container
+            let visualCircle = this.circleContainer
                 .append("circle")
                 .classed("circle", true);
-            let legendRect = this.container
+            let legendRect = this.legendContainer
                 .append("rect")
                 .classed("legend-rect", true);
-            let legendText = this.container
+            let legendText = this.legendContainer
                 .append("text")
                 .classed("legend-text", true);
             let radius = 1;
@@ -217,7 +227,6 @@ class Visual {
                 .on("mousemove", function (event) {
                 dataPointHover(visualCircle, legendRect, hoverFilter, defaultFilter, event);
                 labelHover(event, `${dataPointCat}, ${dataPointValue}`);
-                // console.log(viewModel.dataPoints[i].value)
             })
                 .on("mouseout", function (event) {
                 dataPointHover(visualCircle, legendRect, hoverFilter, defaultFilter, event);
@@ -254,8 +263,8 @@ class Visual {
             }
         }
         // Shoddy workaround - refactor.
-        let hoverLabelFill = this.container.append("rect");
-        let hoverLabel = this.container.append("text").classed("hover-label", true);
+        let hoverLabelFill = this.circleContainer.append("rect").classed("hover-label", true);
+        let hoverLabel = this.circleContainer.append("text").classed("hover-label", true);
         function toggleCircleVis(circle, legendRect, originalColor, hoverFilter) {
             if (circle.style("display") === "none") {
                 circle.style("display", "");
@@ -2217,6 +2226,346 @@ function set(type, name, callback) {
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (dispatch);
+
+
+/***/ }),
+
+/***/ 3008:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (x => () => x);
+
+
+/***/ }),
+
+/***/ 7409:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var d3_dispatch__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(6057);
+/* harmony import */ var d3_selection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3838);
+/* harmony import */ var d3_selection__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(3109);
+/* harmony import */ var _nodrag_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(2718);
+/* harmony import */ var _noevent_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9611);
+/* harmony import */ var _constant_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(3008);
+/* harmony import */ var _event_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(616);
+
+
+
+
+
+
+
+// Ignore right-click, since that should open the context menu.
+function defaultFilter(event) {
+  return !event.ctrlKey && !event.button;
+}
+
+function defaultContainer() {
+  return this.parentNode;
+}
+
+function defaultSubject(event, d) {
+  return d == null ? {x: event.x, y: event.y} : d;
+}
+
+function defaultTouchable() {
+  return navigator.maxTouchPoints || ("ontouchstart" in this);
+}
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__() {
+  var filter = defaultFilter,
+      container = defaultContainer,
+      subject = defaultSubject,
+      touchable = defaultTouchable,
+      gestures = {},
+      listeners = (0,d3_dispatch__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)("start", "drag", "end"),
+      active = 0,
+      mousedownx,
+      mousedowny,
+      mousemoving,
+      touchending,
+      clickDistance2 = 0;
+
+  function drag(selection) {
+    selection
+        .on("mousedown.drag", mousedowned)
+      .filter(touchable)
+        .on("touchstart.drag", touchstarted)
+        .on("touchmove.drag", touchmoved, _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nonpassive */ .Q7)
+        .on("touchend.drag touchcancel.drag", touchended)
+        .style("touch-action", "none")
+        .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
+  }
+
+  function mousedowned(event, d) {
+    if (touchending || !filter.call(this, event, d)) return;
+    var gesture = beforestart(this, container.call(this, event, d), event, d, "mouse");
+    if (!gesture) return;
+    (0,d3_selection__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(event.view)
+      .on("mousemove.drag", mousemoved, _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nonpassivecapture */ .Dd)
+      .on("mouseup.drag", mouseupped, _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nonpassivecapture */ .Dd);
+    (0,_nodrag_js__WEBPACK_IMPORTED_MODULE_3__/* ["default"] */ .Z)(event.view);
+    (0,_noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nopropagation */ .rG)(event);
+    mousemoving = false;
+    mousedownx = event.clientX;
+    mousedowny = event.clientY;
+    gesture("start", event);
+  }
+
+  function mousemoved(event) {
+    (0,_noevent_js__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .ZP)(event);
+    if (!mousemoving) {
+      var dx = event.clientX - mousedownx, dy = event.clientY - mousedowny;
+      mousemoving = dx * dx + dy * dy > clickDistance2;
+    }
+    gestures.mouse("drag", event);
+  }
+
+  function mouseupped(event) {
+    (0,d3_selection__WEBPACK_IMPORTED_MODULE_2__/* ["default"] */ .Z)(event.view).on("mousemove.drag mouseup.drag", null);
+    (0,_nodrag_js__WEBPACK_IMPORTED_MODULE_3__/* .yesdrag */ .D)(event.view, mousemoving);
+    (0,_noevent_js__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .ZP)(event);
+    gestures.mouse("end", event);
+  }
+
+  function touchstarted(event, d) {
+    if (!filter.call(this, event, d)) return;
+    var touches = event.changedTouches,
+        c = container.call(this, event, d),
+        n = touches.length, i, gesture;
+
+    for (i = 0; i < n; ++i) {
+      if (gesture = beforestart(this, c, event, d, touches[i].identifier, touches[i])) {
+        (0,_noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nopropagation */ .rG)(event);
+        gesture("start", event, touches[i]);
+      }
+    }
+  }
+
+  function touchmoved(event) {
+    var touches = event.changedTouches,
+        n = touches.length, i, gesture;
+
+    for (i = 0; i < n; ++i) {
+      if (gesture = gestures[touches[i].identifier]) {
+        (0,_noevent_js__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .ZP)(event);
+        gesture("drag", event, touches[i]);
+      }
+    }
+  }
+
+  function touchended(event) {
+    var touches = event.changedTouches,
+        n = touches.length, i, gesture;
+
+    if (touchending) clearTimeout(touchending);
+    touchending = setTimeout(function() { touchending = null; }, 500); // Ghost clicks are delayed!
+    for (i = 0; i < n; ++i) {
+      if (gesture = gestures[touches[i].identifier]) {
+        (0,_noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nopropagation */ .rG)(event);
+        gesture("end", event, touches[i]);
+      }
+    }
+  }
+
+  function beforestart(that, container, event, d, identifier, touch) {
+    var dispatch = listeners.copy(),
+        p = (0,d3_selection__WEBPACK_IMPORTED_MODULE_4__/* ["default"] */ .Z)(touch || event, container), dx, dy,
+        s;
+
+    if ((s = subject.call(that, new _event_js__WEBPACK_IMPORTED_MODULE_5__/* ["default"] */ .Z("beforestart", {
+        sourceEvent: event,
+        target: drag,
+        identifier,
+        active,
+        x: p[0],
+        y: p[1],
+        dx: 0,
+        dy: 0,
+        dispatch
+      }), d)) == null) return;
+
+    dx = s.x - p[0] || 0;
+    dy = s.y - p[1] || 0;
+
+    return function gesture(type, event, touch) {
+      var p0 = p, n;
+      switch (type) {
+        case "start": gestures[identifier] = gesture, n = active++; break;
+        case "end": delete gestures[identifier], --active; // falls through
+        case "drag": p = (0,d3_selection__WEBPACK_IMPORTED_MODULE_4__/* ["default"] */ .Z)(touch || event, container), n = active; break;
+      }
+      dispatch.call(
+        type,
+        that,
+        new _event_js__WEBPACK_IMPORTED_MODULE_5__/* ["default"] */ .Z(type, {
+          sourceEvent: event,
+          subject: s,
+          target: drag,
+          identifier,
+          active: n,
+          x: p[0] + dx,
+          y: p[1] + dy,
+          dx: p[0] - p0[0],
+          dy: p[1] - p0[1],
+          dispatch
+        }),
+        d
+      );
+    };
+  }
+
+  drag.filter = function(_) {
+    return arguments.length ? (filter = typeof _ === "function" ? _ : (0,_constant_js__WEBPACK_IMPORTED_MODULE_6__/* ["default"] */ .Z)(!!_), drag) : filter;
+  };
+
+  drag.container = function(_) {
+    return arguments.length ? (container = typeof _ === "function" ? _ : (0,_constant_js__WEBPACK_IMPORTED_MODULE_6__/* ["default"] */ .Z)(_), drag) : container;
+  };
+
+  drag.subject = function(_) {
+    return arguments.length ? (subject = typeof _ === "function" ? _ : (0,_constant_js__WEBPACK_IMPORTED_MODULE_6__/* ["default"] */ .Z)(_), drag) : subject;
+  };
+
+  drag.touchable = function(_) {
+    return arguments.length ? (touchable = typeof _ === "function" ? _ : (0,_constant_js__WEBPACK_IMPORTED_MODULE_6__/* ["default"] */ .Z)(!!_), drag) : touchable;
+  };
+
+  drag.on = function() {
+    var value = listeners.on.apply(listeners, arguments);
+    return value === listeners ? drag : value;
+  };
+
+  drag.clickDistance = function(_) {
+    return arguments.length ? (clickDistance2 = (_ = +_) * _, drag) : Math.sqrt(clickDistance2);
+  };
+
+  return drag;
+}
+
+
+/***/ }),
+
+/***/ 616:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Z": () => (/* binding */ DragEvent)
+/* harmony export */ });
+function DragEvent(type, {
+  sourceEvent,
+  subject,
+  target,
+  identifier,
+  active,
+  x, y, dx, dy,
+  dispatch
+}) {
+  Object.defineProperties(this, {
+    type: {value: type, enumerable: true, configurable: true},
+    sourceEvent: {value: sourceEvent, enumerable: true, configurable: true},
+    subject: {value: subject, enumerable: true, configurable: true},
+    target: {value: target, enumerable: true, configurable: true},
+    identifier: {value: identifier, enumerable: true, configurable: true},
+    active: {value: active, enumerable: true, configurable: true},
+    x: {value: x, enumerable: true, configurable: true},
+    y: {value: y, enumerable: true, configurable: true},
+    dx: {value: dx, enumerable: true, configurable: true},
+    dy: {value: dy, enumerable: true, configurable: true},
+    _: {value: dispatch}
+  });
+}
+
+DragEvent.prototype.on = function() {
+  var value = this._.on.apply(this._, arguments);
+  return value === this._ ? this : value;
+};
+
+
+/***/ }),
+
+/***/ 5130:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "oh": () => (/* reexport safe */ _drag_js__WEBPACK_IMPORTED_MODULE_0__.Z)
+/* harmony export */ });
+/* harmony import */ var _drag_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(7409);
+
+
+
+
+/***/ }),
+
+/***/ 2718:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "D": () => (/* binding */ yesdrag),
+/* harmony export */   "Z": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var d3_selection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3838);
+/* harmony import */ var _noevent_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(9611);
+
+
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(view) {
+  var root = view.document.documentElement,
+      selection = (0,d3_selection__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)(view).on("dragstart.drag", _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .ZP, _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nonpassivecapture */ .Dd);
+  if ("onselectstart" in root) {
+    selection.on("selectstart.drag", _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .ZP, _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nonpassivecapture */ .Dd);
+  } else {
+    root.__noselect = root.style.MozUserSelect;
+    root.style.MozUserSelect = "none";
+  }
+}
+
+function yesdrag(view, noclick) {
+  var root = view.document.documentElement,
+      selection = (0,d3_selection__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .Z)(view).on("dragstart.drag", null);
+  if (noclick) {
+    selection.on("click.drag", _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* ["default"] */ .ZP, _noevent_js__WEBPACK_IMPORTED_MODULE_1__/* .nonpassivecapture */ .Dd);
+    setTimeout(function() { selection.on("click.drag", null); }, 0);
+  }
+  if ("onselectstart" in root) {
+    selection.on("selectstart.drag", null);
+  } else {
+    root.style.MozUserSelect = root.__noselect;
+    delete root.__noselect;
+  }
+}
+
+
+/***/ }),
+
+/***/ 9611:
+/***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "Dd": () => (/* binding */ nonpassivecapture),
+/* harmony export */   "Q7": () => (/* binding */ nonpassive),
+/* harmony export */   "ZP": () => (/* export default binding */ __WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "rG": () => (/* binding */ nopropagation)
+/* harmony export */ });
+// These are typically used in conjunction with noevent to ensure that we can
+// preventDefault on the event.
+const nonpassive = {passive: false};
+const nonpassivecapture = {capture: true, passive: false};
+
+function nopropagation(event) {
+  event.stopImmediatePropagation();
+}
+
+/* harmony default export */ function __WEBPACK_DEFAULT_EXPORT__(event) {
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}
 
 
 /***/ }),
@@ -7262,16 +7611,18 @@ function defaultConstrain(transform, extent, translateExtent) {
 /***/ ((__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) => {
 
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "Ys": () => (/* reexport safe */ d3_selection__WEBPACK_IMPORTED_MODULE_2__.Ys),
-/* harmony export */   "cx$": () => (/* reexport safe */ d3_selection__WEBPACK_IMPORTED_MODULE_2__.cx),
-/* harmony export */   "p2C": () => (/* reexport safe */ d3_scale__WEBPACK_IMPORTED_MODULE_1__.p2),
-/* harmony export */   "td_": () => (/* reexport safe */ d3_selection__WEBPACK_IMPORTED_MODULE_2__.td)
+/* harmony export */   "Ys": () => (/* reexport safe */ d3_selection__WEBPACK_IMPORTED_MODULE_3__.Ys),
+/* harmony export */   "cx$": () => (/* reexport safe */ d3_selection__WEBPACK_IMPORTED_MODULE_3__.cx),
+/* harmony export */   "ohM": () => (/* reexport safe */ d3_drag__WEBPACK_IMPORTED_MODULE_1__.oh),
+/* harmony export */   "p2C": () => (/* reexport safe */ d3_scale__WEBPACK_IMPORTED_MODULE_2__.p2),
+/* harmony export */   "td_": () => (/* reexport safe */ d3_selection__WEBPACK_IMPORTED_MODULE_3__.td)
 /* harmony export */ });
 /* harmony import */ var d3_brush__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(9961);
-/* harmony import */ var d3_scale__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(1770);
-/* harmony import */ var d3_selection__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(3950);
-/* harmony import */ var d3_transition__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3399);
-/* harmony import */ var d3_zoom__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(5180);
+/* harmony import */ var d3_drag__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(5130);
+/* harmony import */ var d3_scale__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(1770);
+/* harmony import */ var d3_selection__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(3950);
+/* harmony import */ var d3_transition__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(3399);
+/* harmony import */ var d3_zoom__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(5180);
 
 
 

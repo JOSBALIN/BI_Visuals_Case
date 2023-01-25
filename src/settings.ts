@@ -42,13 +42,13 @@ export class CircleSettings extends FormattingSettingsCard {
 
   public toggleLegend = new formattingSettings.ToggleSwitch({
     name: "toggleLegend",
-    displayName: "Toggle legend",
+    displayName: "Legend",
     value:true
   })
 
   public toggleLog = new formattingSettings.ToggleSwitch({
     name: "toggleLog",
-    displayName: "Toggle Logarithm",
+    displayName: "Logarithm (base 10)",
     value:false
   })
 
@@ -63,12 +63,11 @@ export class CircleSettings extends FormattingSettingsCard {
   });
 
   public name: string = "circle";
-  public displayName: string = "Circle";
+  public displayName: string = "Graph options";
   public slices: FormattingSettingsSlice[] = [
     this.toggleLegend,
+    this.toggleLog,
     this.fillColor,
-    this.circleThickness,
-    this.toggleLog
   ];
 }
 
