@@ -32,12 +32,25 @@ import FormattingSettingsCard = formattingSettings.Card;
 import FormattingSettingsSlice = formattingSettings.Slice;
 import FormattingSettingsModel = formattingSettings.Model;
 
+
 export class CircleSettings extends FormattingSettingsCard {
-  public circleColor = new formattingSettings.ColorPicker({
-    name: "circleColor",
+  public fillColor = new formattingSettings.ColorPicker({
+    name: "fillColor",
     displayName: "Fill",
-    value: { value: "#ffffff" },
+    value: { value: "#01b8aa" },
   });
+
+  public toggleLegend = new formattingSettings.ToggleSwitch({
+    name: "toggleLegend",
+    displayName: "Toggle legend",
+    value:true
+  })
+
+  public toggleLog = new formattingSettings.ToggleSwitch({
+    name: "toggleLog",
+    displayName: "Toggle Logarithm",
+    value:false
+  })
 
 
 
@@ -52,12 +65,17 @@ export class CircleSettings extends FormattingSettingsCard {
   public name: string = "circle";
   public displayName: string = "Circle";
   public slices: FormattingSettingsSlice[] = [
-    this.circleColor,
-    this.circleThickness
+    this.toggleLegend,
+    this.fillColor,
+    this.circleThickness,
+    this.toggleLog
   ];
 }
 
 export class VisualSettings extends FormattingSettingsModel {
+  static parse(dataView: powerbi.DataView): VisualSettings {
+    throw new Error("Method not implemented.");
+  }
   public circle: CircleSettings = new CircleSettings();
   public cards: FormattingSettingsCard[] = [this.circle];
 }

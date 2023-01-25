@@ -4,19 +4,19 @@
             "displayName": "Measure",
             "name": "measure",
             "kind": "Measure",
-            "description": "Singleton values, max 1"
+            "description": "Measurement value"
         },
         {
             "displayName": "Category",
             "name": "category",
             "kind": "Grouping",
-            "description": "Grouping to display"
+            "description": "Grouping of measurements"
         }
     ],
     "objects": {
         "circle": {
             "properties": {
-                "circleColor": {
+                "fillColor": {
                     "type": {
                         "fill": {
                             "solid": {
@@ -28,6 +28,16 @@
                 "circleThickness": {
                     "type": {
                         "numeric": true
+                    }
+                },
+                "toggleLegend": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "toggleLog": {
+                    "type": {
+                        "bool": true
                     }
                 }                
             }

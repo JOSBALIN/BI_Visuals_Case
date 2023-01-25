@@ -28,6 +28,7 @@
 
 import "./../style/visual.less";
 import powerbi from "powerbi-visuals-api";
+import PrimitiveValue = powerbi.PrimitiveValue;
 import VisualConstructorOptions = powerbi.extensibility.visual.VisualConstructorOptions;
 import VisualUpdateOptions = powerbi.extensibility.visual.VisualUpdateOptions;
 import IVisual = powerbi.extensibility.visual.IVisual;
@@ -37,17 +38,27 @@ import * as d3 from "d3";
 type Selection<T extends d3.BaseType> = d3.Selection<T, any, any, any>;
 import { VisualSettings } from "./settings";
 import { FormattingSettingsService } from "powerbi-visuals-utils-formattingmodel";
-import { interpolateRgb, Numeric } from "d3";
+
+import DataViewCategorical = powerbi.DataViewCategorical;
+import DataViewCategoricalColumn = powerbi.DataViewCategoricalColumn;
+import DataViewCategoryColumn = powerbi.DataViewCategoryColumn;
 
 export interface CircleDataPoint {
+  category: string;
   value: number;
+}
+
+export interface CircleViewModel {
+  dataPoints?: CircleDataPoint[];
+  circleColor?: string;
+  circleName?: string;
+  measureName?: string;
 }
 
 export class Visual implements IVisual {
   private host: IVisualHost;
   private svgRoot: Selection<SVGElement>;
   private container: Selection<SVGElement>;
-  private circle: Selection<SVGElement>;
   private textValue: Selection<SVGElement>;
   private textLabel: Selection<SVGElement>;
 
@@ -61,87 +72,243 @@ export class Visual implements IVisual {
       .append("svg")
       .classed("circleCard", true);
     this.container = this.svgRoot.append("g").classed("container", true);
-    this.circle = this.container.append("circle").classed("circle", true);
     this.textValue = this.container.append("text").classed("textValue", true);
     this.textLabel = this.container.append("text").classed("textLabel", true);
   }
-  
+
   public update(options: VisualUpdateOptions) {
     let dataView: DataView = options.dataViews[0];
     let width: number = options.viewport.width;
     let height: number = options.viewport.height;
-    console.log(options)
+    this.visualSettings =
+      this.formattingSettingsService.populateFormattingSettingsModel(
+        VisualSettings,
+        options.dataViews
+      );
+    let visualFill: string = this.visualSettings.circle.fillColor.value.value;
+    let toggleLegend: boolean = this.visualSettings.circle.toggleLegend.value;
+    let toggleLog: boolean = this.visualSettings.circle.toggleLog.value;
+    console.log(this.visualSettings.circle.fillColor.value.value);
 
-    
+    // Remove all existing circles to avoid infinite renders
+    // Perhaps not ideal?
+    d3.selectAll(".circle").remove();
+    d3.selectAll(".legend-text").remove();
+    d3.selectAll(".legend-rect").remove();
 
-        function open(){
-          console.log("ayy")
-          window.open(
-            'http://en.wikipedia.org',
-            '_blank' // <- This is what makes it open in a new window.
+    var viewModel: CircleViewModel = this.createViewModel(options.dataViews[0]);
+
+    this.svgRoot.attr("width", width).attr("height", height);
+
+    function labelHover(event: Event, outputString: string) {
+      let position = d3.pointer(event);
+
+      hoverLabel
+        .text(outputString)
+        .attr("x", position[0])
+        .attr("y", position[1])
+        .attr("dy", 60)
+        .attr("fill", "white")
+        .attr("text-anchor", "middle")
+        .style("font-size", 20 + "px")
+        .style("display", "")
+        .attr("height", 50);
+
+      let labelNode = hoverLabel.node().getBBox();
+
+      hoverLabelFill
+        .attr("x", labelNode.x - 8)
+        .attr("y", labelNode.y - 8)
+        .attr("width", labelNode.width + 16)
+        .attr("height", labelNode.height + 16)
+        .attr("fill", "rgba(0, 0, 0, 0.6)")
+        .style("border", "1px solid black")
+        .style("display", "")
+        .attr("stroke", "black")
+        .attr("stroke-width", "1px");
+    }
+
+    let responsiveRadius: number = Math.min(width, height) / 2.2;
+    let fontSizeValue: number = width / 40;
+    let logScale = d3
+      .scaleLog()
+      .domain([
+        viewModel.dataPoints[0].value,
+        viewModel.dataPoints[viewModel.dataPoints.length - 1].value,
+      ])
+      .range([10, 100])
+      .base(10);
+
+    for (var i = 0; i < viewModel.dataPoints.length; i++) {
+      let dataPointValue: number = viewModel.dataPoints[i].value;
+      let dataPointCat: string = viewModel.dataPoints[i].category;
+      let defaultFilter: string = `brightness(${(i + 1) * 20}%)`;
+      let hoverFilter: string = `brightness(${(i + 1) * 30}%)`;
+      let visualCircle = this.container
+        .append("circle")
+        .classed("circle", true);
+      let legendRect = this.container
+        .append("rect")
+        .classed("legend-rect", true);
+      let legendText = this.container
+        .append("text")
+        .classed("legend-text", true);
+      let radius = 1;
+      if (i > 0) radius = dataPointValue / viewModel.dataPoints[0].value;
+
+      if (toggleLog) radius = (110 - logScale(dataPointValue)) / 100;
+
+      console.log(
+        `I:${i}, DATA: ${
+          dataPointValue / viewModel.dataPoints[0].value
+        }, LOG: ${110 - logScale(dataPointValue)}`
+      );
+
+      visualCircle
+        .style("fill", visualFill)
+        .style("filter", defaultFilter)
+        .style("stroke", "black")
+        .style("stroke-width", 2)
+        .attr("r", responsiveRadius * radius)
+        .attr("cx", width / 2)
+        .attr("cy", height / 2)
+        .on("mousemove", function (event) {
+          dataPointHover(
+            visualCircle,
+            legendRect,
+            hoverFilter,
+            defaultFilter,
+            event
           );
-        }
-    
-    this.svgRoot
-    .attr("width", width)
-    .attr("height", height)
-    .on('click', function() {
-      open()
-    });
-    let radius: number = Math.min(width, height) / 2.2;
+          labelHover(event, `${dataPointCat}, ${dataPointValue}`);
+          // console.log(viewModel.dataPoints[i].value)
+        })
+        .on("mouseout", function (event) {
+          dataPointHover(
+            visualCircle,
+            legendRect,
+            hoverFilter,
+            defaultFilter,
+            event
+          );
+          hoverLabel.style("display", "none");
+          hoverLabelFill.style("display", "none");
+        });
 
-    this.visualSettings = this.formattingSettingsService.populateFormattingSettingsModel(VisualSettings, options.dataViews);
-    this.visualSettings.circle.circleThickness.value = Math.max(0, this.visualSettings.circle.circleThickness.value);
-    this.visualSettings.circle.circleThickness.value = Math.min(10, this.visualSettings.circle.circleThickness.value);
+      if (toggleLegend) {
+        legendText
+          .text(dataPointCat)
+          .attr("x", "58px")
+          .attr("y", (i + 1) * 40 + 24 + height / 10 + "px")
+          .attr("fill", "black")
+          .style("font-size", fontSizeValue + "px")
+          .style("display", "")
+          .attr("height", 50);
 
+        legendRect
+          .style("width", "30px")
+          .style("stroke-width", "1px")
+          .style("stroke", "black")
+          .style("height", "30px")
+          .style("x", "20px")
+          .style("y", (i + 1) * 40 + height / 10 + "px")
+          .style("fill", visualFill)
+          .style("filter", `brightness(${(i + 1) * 20}%)`)
+          .on("mousemove", function (event) {
+            dataPointHover(
+              visualCircle,
+              legendRect,
+              hoverFilter,
+              defaultFilter,
+              event
+            );
+          })
+          .on("mouseout", function (event) {
+            dataPointHover(
+              visualCircle,
+              legendRect,
+              hoverFilter,
+              defaultFilter,
+              event
+            );
+          })
+          .on("mousedown", function () {
+            toggleCircleVis(visualCircle, legendRect, visualFill, hoverFilter);
+          });
+      }
+    }
 
-  
-    
-    // TOTAL
-    // GOAL
-    // Min (to reach one color)
-    // Max (to reach another color)
-    // Coloring is based on total's proximity to goal
-    // Color is dependant on min and max.
-    // The closer (total / goal) * 100 is to the percent of max, the closer it moves towards color max threshold
-    // The closer (total / goal) * 100 is to the percent of min, the closer it moves towards the color min threshold
+    // Shoddy workaround - refactor.
+    let hoverLabelFill = this.container.append("rect");
+    let hoverLabel = this.container.append("text").classed("hover-label", true);
 
-    // this.visualSettings.circle.circleThresholdMax.value = parseInt(String(dataView.single.value)); // casting to string before parseInt. Refactor in future.
+    function toggleCircleVis(circle, legendRect, originalColor, hoverFilter) {
+      if (circle.style("display") === "none") {
+        circle.style("display", "");
+        legendRect.style("fill", originalColor);
+        legendRect.style("filter", hoverFilter);
+      } else {
+        circle.style("display", "none");
+        legendRect.style("fill", "black");
+        legendRect.style("filter", "brightness(100%)");
+      }
+    }
 
-    // (parseInt(String(dataView.single.value)) / this.visualSettings.circle.circleThresholdGoal.value)
-
-    let interpolatedPercent: number = 0.5
-
-    let interpolatedColor = interpolateRgb(this.visualSettings.circle.circleColor.value.value, "blue")(interpolatedPercent);
-
-    this.circle
-    .style("fill", this.visualSettings.circle.circleColor.value.value)
-      .style("stroke", "black")
-      .style("stroke-width", this.visualSettings.circle.circleThickness.value)
-      .attr("r", radius)
-      .attr("cx", width / 2)
-      .attr("cy", height / 2);
-    let fontSizeValue: number = Math.min(width, height) / 5;
-    this.textValue
-      .text(<string>dataView.single.value)
-      .attr("x", "50%")
-      .attr("y", "50%")
-      .attr("dy", "0.35em")
-      .attr("text-anchor", "middle")
-      .style("font-size", fontSizeValue + "px");
-    let fontSizeLabel: number = fontSizeValue / 4;
-    this.textLabel
-      .text(dataView.metadata.columns[0].displayName)
-      .attr("x", "50%")
-      .attr("y", height / 2)
-      .attr("dy", fontSizeValue / 1.2)
-      .attr("text-anchor", "middle")
-      .style("font-size", fontSizeLabel + "px");
+    function dataPointHover(
+      circle,
+      legendRect,
+      hoverFilter,
+      defaultFilter,
+      event
+    ) {
+      if (event.type === "mousemove") {
+        legendRect.style("filter", hoverFilter);
+        circle.style("filter", hoverFilter);
+      } else {
+        legendRect.style("filter", defaultFilter);
+        circle.style("filter", defaultFilter);
+      }
+    }
   }
 
   public getFormattingModel(): powerbi.visuals.FormattingModel {
     return this.formattingSettingsService.buildFormattingModel(
       this.visualSettings
     );
+  }
+
+  public createViewModel(dataView: DataView): CircleViewModel {
+    let categoricalDataView: DataViewCategorical = dataView.categorical;
+
+    var categoryValues: PrimitiveValue[] = categoricalDataView.values[0].values;
+    var categoryColumn: DataViewCategoricalColumn =
+      categoricalDataView.categories[0];
+    var categoryNames: PrimitiveValue[] =
+      categoricalDataView.categories[0].values;
+
+    var circleDataPoints: CircleDataPoint[] = [];
+
+    // Iterate over values and categories
+    for (var i = 0; i < categoryValues.length; i++) {
+      // get category name and category value
+      var category: string = <string>categoryNames[i];
+      var categoryValue: number = <number>categoryValues[i];
+      // add new data point to barchartDataPoints collection
+      // console.log(`${category}: ${categoryValue}`);
+      circleDataPoints.push({
+        category: category,
+        value: categoryValue,
+      });
+    }
+
+    circleDataPoints.sort((x, y) => {
+      return y.value - x.value;
+    });
+
+    return {
+      dataPoints: circleDataPoints,
+      circleName: "CircleName",
+      measureName: "MeasureName",
+    };
   }
 }
